@@ -29,86 +29,171 @@
   </div>
 </section>
 
-<!-- JOGO -->
+<!-- APP -->
 <section id="game" class="hide">
   <header class="top">
-    <div class="logo">Bingo<span>Pix</span></div>
-    <div class="live"><i></i><b id="online">0</b> online</div>
-    <div class="wallet"><span>🪙</span><b id="bal">0</b><small>fichas</small></div>
-    <button id="voiceBtn" class="icon" title="Narração">🔊</button>
     <button id="menuBtn" class="icon">☰</button>
+    <div class="logo">Bingo<span>Pix</span></div>
+    <div class="live"><i></i><b id="online">0</b></div>
+    <div class="wallet" data-go="carteira"><span>🪙</span><b id="bal">0</b></div>
+    <button id="voiceBtn" class="icon sm" title="Narração">🔊</button>
   </header>
-  <div id="menu" class="menu hide">
-    <div id="who"></div>
-    <button id="refill">Recarregar fichas grátis</button>
-    <button id="logout">Sair</button>
-  </div>
+
+  <!-- menu lateral -->
+  <div id="drawerBg" class="drawer-bg hide"></div>
+  <nav id="drawer" class="drawer">
+    <div class="dr-head">
+      <div class="dr-logo">Bingo<span>Pix</span></div>
+      <button id="drClose" class="icon">✕</button>
+      <div class="dr-user"><span>Olá, <b id="drName"></b></span><button data-go="perfil" class="edit">✎ Editar Perfil</button></div>
+      <div class="dr-vip" id="drVip"></div>
+    </div>
+    <div class="dr-items">
+      <button data-go="vivo"><i>📡</i>Sorteio ao Vivo</button>
+      <button data-go="rodadas"><i>📅</i>Rodadas</button>
+      <button data-go="especiais"><i>⭐</i>Rodadas Especiais</button>
+      <button data-go="carteira"><i>👛</i>Carteira</button>
+      <button data-go="extrato"><i>🧾</i>Extrato</button>
+      <button data-go="vip"><i>👑</i>Benefícios VIP</button>
+      <button data-go="indique"><i>🎁</i>Indique e Ganhe</button>
+      <button data-go="historico"><i>🕘</i>Histórico de Jogos</button>
+    </div>
+    <div class="dr-foot">
+      <button data-go="ajuda"><i>❔</i>Ajuda</button>
+      <button id="logout" class="out"><i>↪</i>Sair</button>
+    </div>
+  </nav>
 
   <main>
-    <div class="stage">
-      <div class="round-info">
-        <div><small>Rodada</small><b id="rNo">#0</b></div>
-        <div><small>Prêmio total</small><b id="pool">0</b></div>
-        <div><small>Cartelas</small><b id="nCards">0</b></div>
-      </div>
-
-      <div class="draw">
-        <div id="bigBall" class="bigball"><span>?</span></div>
-        <div class="draw-side">
-          <div id="status" class="status">Carregando…</div>
-          <div id="count" class="count"></div>
-          <div class="last" id="last"></div>
-          <div id="best" class="best"></div>
+    <!-- SORTEIO AO VIVO -->
+    <div class="view" id="v-vivo">
+      <div class="stage">
+        <div id="specialTag" class="special-tag hide">⭐ RODADA ESPECIAL · prêmio turbinado</div>
+        <div class="round-info">
+          <div><small>Rodada</small><b id="rNo">#0</b></div>
+          <div><small>Prêmio total</small><b id="pool">0</b></div>
+          <div><small>Cartelas</small><b id="nCards">0</b></div>
+        </div>
+        <div class="draw">
+          <div id="bigBall" class="bigball"><span>?</span></div>
+          <div class="draw-side">
+            <div id="status" class="status">Carregando…</div>
+            <div id="count" class="count"></div>
+            <div class="last" id="last"></div>
+            <div id="best" class="best"></div>
+          </div>
+        </div>
+        <div id="nearBox" class="near hide">
+          <div class="near-h"><b>🔥 Mais perto de ganhar</b><small>números que faltam</small></div>
+          <ol id="nearList"></ol>
+        </div>
+        <div class="prizes">
+          <div class="pz" id="pz-quadra"><small>Quadra</small><b>0</b><em></em></div>
+          <div class="pz" id="pz-quina"><small>Quina</small><b>0</b><em></em></div>
+          <div class="pz" id="pz-bingo"><small>Bingo</small><b>0</b><em></em></div>
+        </div>
+        <div id="buyBox" class="buy">
+          <div class="buy-row">
+            <button class="qty" data-d="-1">−</button>
+            <input id="qty" type="number" value="5" min="1" max="50">
+            <button class="qty" data-d="1">+</button>
+            <div class="quick"><button data-q="1">1</button><button data-q="10">10</button><button data-q="20">20</button><button data-q="50">50</button></div>
+          </div>
+          <button id="buyBtn" class="btn big">Comprar cartelas</button>
+          <div class="price">Cada cartela custa <b id="price">20</b> fichas</div>
         </div>
       </div>
-      <div id="nearBox" class="near hide">
-        <div class="near-h"><b>🔥 Mais perto de ganhar</b><small>números que faltam</small></div>
-        <ol id="nearList"></ol>
-      </div>
-
-      <div class="prizes">
-        <div class="pz" id="pz-quadra"><small>Quadra</small><b>0</b><em></em></div>
-        <div class="pz" id="pz-quina"><small>Quina</small><b>0</b><em></em></div>
-        <div class="pz" id="pz-bingo"><small>Bingo</small><b>0</b><em></em></div>
-      </div>
-
-      <div id="buyBox" class="buy">
-        <div class="buy-row">
-          <button class="qty" data-d="-1">−</button>
-          <input id="qty" type="number" value="5" min="1" max="50">
-          <button class="qty" data-d="1">+</button>
-          <div class="quick"><button data-q="1">1</button><button data-q="10">10</button><button data-q="20">20</button><button data-q="50">50</button></div>
-        </div>
-        <button id="buyBtn" class="btn big">Comprar cartelas</button>
-        <div class="price">Cada cartela custa <b id="price">10</b> fichas</div>
-      </div>
+      <h3>Minhas cartelas <small id="myCount"></small></h3>
+      <div id="cards" class="cards"></div>
+      <div class="panel"><h3>Bolas sorteadas</h3><div id="board" class="board"></div></div>
     </div>
 
-    <h3>Minhas cartelas <small id="myCount"></small></h3>
-    <div id="cards" class="cards"><p class="empty">Compre cartelas pra jogar a próxima rodada.</p></div>
-
-    <div class="grid2">
-      <div class="panel">
-        <h3>Bolas sorteadas</h3>
-        <div id="board" class="board"></div>
-      </div>
-      <div class="panel">
-        <h3>Chat</h3>
-        <div id="chatList" class="chat"></div>
-        <form id="chatForm" class="chatf"><input id="chatIn" maxlength="140" placeholder="Mande um oi…"><button>➤</button></form>
-      </div>
+    <!-- RODADAS -->
+    <div class="view hide" id="v-rodadas">
+      <h2>📅 Rodadas</h2>
+      <p class="sub">Uma rodada a cada 5 minutos, 24 horas por dia. As compras abrem assim que a rodada anterior termina.</p>
+      <div id="schedList" class="list"></div>
+      <h3>Últimas rodadas</h3>
+      <div id="histList" class="list"></div>
     </div>
 
-    <div class="panel invite">
-      <h3>🎁 Convide e ganhe</h3>
-      <p>Cada amigo que entrar pelo seu link e comprar a primeira cartela te dá <b id="refB">40</b> fichas pra comprar cartelas.</p>
+    <!-- ESPECIAIS -->
+    <div class="view hide" id="v-especiais">
+      <h2>⭐ Rodadas Especiais</h2>
+      <div class="hero-card"><b>Toda hora cheia</b> tem rodada especial com prêmio garantido de <b id="spPool">3.000</b> fichas, mesmo com poucas cartelas.</div>
+      <div id="spList" class="list"></div>
+    </div>
+
+    <!-- CARTEIRA -->
+    <div class="view hide" id="v-carteira">
+      <h2>👛 Carteira</h2>
+      <div class="balance-card"><small>Seu saldo</small><b id="wBal">0</b><span>fichas</span></div>
+      <div class="stats3">
+        <div><small>Prêmios ganhos</small><b id="wWon">0</b></div>
+        <div><small>Vitórias</small><b id="wWins">0</b></div>
+        <div><small>Bônus indicação</small><b id="wRef">0</b></div>
+      </div>
+      <button id="refill" class="btn big">Recarregar 1.000 fichas grátis</button>
+      <p class="sub center">A recarga grátis libera quando suas fichas acabarem.</p>
+      <button class="link-btn" data-go="extrato">Ver extrato completo →</button>
+    </div>
+
+    <!-- EXTRATO -->
+    <div class="view hide" id="v-extrato">
+      <h2>🧾 Extrato</h2>
+      <div id="txList" class="list"></div>
+    </div>
+
+    <!-- VIP -->
+    <div class="view hide" id="v-vip">
+      <h2>👑 Benefícios VIP</h2>
+      <div class="vip-now" id="vipNow"></div>
+      <div id="vipLevels" class="list"></div>
+      <p class="sub">O nível sobe conforme o total de cartelas compradas. O cashback cai no fim de cada rodada em que você jogou.</p>
+    </div>
+
+    <!-- INDIQUE -->
+    <div class="view hide" id="v-indique">
+      <h2>🎁 Indique e Ganhe</h2>
+      <div class="hero-card">Cada amigo que entrar pelo seu link e comprar a primeira cartela te dá <b id="refB">40</b> fichas pra comprar cartelas.</div>
       <div class="reflink"><input id="refLink" readonly><button id="copyRef" class="btn">Copiar</button></div>
-      <div class="refstats"><span>Amigos: <b id="refN">0</b></span><span>Bônus ganho: <b id="refE">0</b> fichas</span><button id="shareRef">Compartilhar</button></div>
+      <button id="shareRef" class="btn big wa">Compartilhar no WhatsApp</button>
+      <div class="stats3 two">
+        <div><small>Amigos indicados</small><b id="refN">0</b></div>
+        <div><small>Bônus ganho</small><b id="refE">0</b></div>
+      </div>
+      <h3>Como funciona</h3>
+      <ol class="steps"><li>Copie seu link e mande pros amigos.</li><li>O amigo cria a conta pelo link.</li><li>Quando ele comprar a primeira cartela, você ganha as fichas na hora.</li></ol>
     </div>
 
-    <div class="grid2">
-      <div class="panel"><h3>🏆 Ranking</h3><ol id="rank" class="rank"></ol></div>
-      <div class="panel"><h3>Últimas rodadas</h3><div id="hist" class="hist"></div></div>
+    <!-- HISTÓRICO -->
+    <div class="view hide" id="v-historico">
+      <h2>🕘 Histórico de Jogos</h2>
+      <div id="gamesList" class="list"></div>
+    </div>
+
+    <!-- AJUDA -->
+    <div class="view hide" id="v-ajuda">
+      <h2>❔ Ajuda</h2>
+      <details open><summary>Como funciona uma rodada?</summary><p>A cada 5 minutos começa um sorteio de 90 bolas. Antes dele, você compra cartelas de 15 números (3 linhas de 5). Os números são marcados sozinhos.</p></details>
+      <details><summary>Quais são os prêmios?</summary><p><b>Quadra</b>: 4 números numa mesma linha (15% do prêmio). <b>Quina</b>: uma linha completa (25%). <b>Bingo</b>: a cartela inteira (60%). Se mais de uma cartela ganhar na mesma bola, o prêmio é dividido.</p></details>
+      <details><summary>O que é Rodada Especial?</summary><p>A rodada de toda hora cheia (ex: 21:00, 22:00) tem prêmio garantido maior.</p></details>
+      <details><summary>Acabaram minhas fichas, e agora?</summary><p>Na Carteira tem a recarga grátis de 1.000 fichas, liberada quando o saldo acaba.</p></details>
+      <details><summary>Fichas valem dinheiro?</summary><p>Não. As fichas são só para jogar no BingoPix e não podem ser compradas, sacadas nem trocadas por dinheiro.</p></details>
+      <details><summary>Como ligo a narração?</summary><p>Toque no 🔊 no topo. No celular, a voz começa depois do primeiro toque na tela.</p></details>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="view hide" id="v-perfil">
+      <h2>✎ Editar Perfil</h2>
+      <div class="panel prof"><div><small>Usuário</small><b id="pName"></b></div><div><small>Membro desde</small><b id="pSince"></b></div><div><small>Nível VIP</small><b id="pVip"></b></div></div>
+      <h3>Trocar senha</h3>
+      <form id="pwForm" class="pwform">
+        <label>Senha atual<input id="pOld" type="password" autocomplete="current-password" required></label>
+        <label>Nova senha<input id="pNew" type="password" autocomplete="new-password" required></label>
+        <div id="pErr" class="err"></div>
+        <button class="btn big">Salvar nova senha</button>
+      </form>
     </div>
   </main>
   <footer>BingoPix · Fichas são só para jogar e não podem ser trocadas por dinheiro.</footer>

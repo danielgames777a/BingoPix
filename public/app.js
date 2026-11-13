@@ -36,16 +36,19 @@ $('#authForm').onsubmit = async (e) => {
   $('#aBtn').disabled = false;
 };
 $('#logout').onclick = () => { localStorage.removeItem('bp_token'); location.reload(); };
-$('#menuBtn').onclick = () => $('#menu').classList.toggle('hide');
-$('#refill').onclick = async () => { try { const j = await api('refill', {}); setMe(j.user); toast('+1.000 fichas'); } catch (e) { toast(e.message); } $('#menu').classList.add('hide'); };
+$('#refill').onclick = async () => { try { const j = await api('refill', {}); setMe(j.user); toast('+1.000 fichas'); } catch (e) { toast(e.message); } };
 
 function setMe(u) {
   me = u; $('#bal').textContent = fmt(u.balance);
-  $('#refLink').value = location.origin + '/?ref=' + u.ref; $('#refN').textContent = u.refs; $('#refE').textContent = fmt(u.refEarned); $('#who').textContent = `👤 ${u.name} · ${u.wins} prêmios · ${fmt(u.won)} fichas ganhas`; }
+  $('#refLink').value = location.origin + '/?ref=' + u.ref; $('#refN').textContent = u.refs; $('#refE').textContent = fmt(u.refEarned);
+  $('#drName').textContent = u.name.toUpperCase(); $('#drVip').textContent = '👑 VIP ' + u.vip.name;
+  $('#wBal').textContent = fmt(u.balance); $('#wWon').textContent = fmt(u.won); $('#wWins').textContent = u.wins; $('#wRef').textContent = fmt(u.refEarned);
+  $('#pName').textContent = u.name; $('#pSince').textContent = new Date(u.created).toLocaleDateString('pt-BR'); $('#pVip').textContent = u.vip.name;
+}
 
 function enter() {
   $('#auth').classList.add('hide'); $('#game').classList.remove('hide'); setMe(me);
-  buildBoard(); connect(); loadRank(); setInterval(loadRank, 30000);
+  buildBoard(); connect(); go(location.hash.slice(1) || 'vivo');
 }
 
 // ---------- jogo ----------
@@ -58,8 +61,6 @@ function connect() {
   sock.on('me', setMe);
   sock.on('note', toast);
   sock.on('online', (n) => ($('#online').textContent = n));
-  sock.on('chat', (list) => { $('#chatList').innerHTML = ''; list.forEach(addChat); });
-  sock.on('say', addChat);
 }
 
 function render(newRound) {
@@ -67,7 +68,7 @@ function render(newRound) {
   $('#rNo').textContent = '#' + S.no;
   $('#pool').textContent = fmt(S.pool);
   $('#nCards').textContent = S.nCards;
-  $('#price').textContent = S.price; $('#refB').textContent = S.refBonus;
+  $('#price').textContent = S.price; $('#refB').textContent = S.refBonus; $('#specialTag').classList.toggle('hide', !S.special);
   for (const k of ['quadra', 'quina', 'bingo']) {
     const el = $('#pz-' + k), p = S.prizes[k];
     el.querySelector('b').textContent = fmt(p ? p.amount : Math.floor(S.pool * S.split[k]));
@@ -145,7 +146,6 @@ function onBall({ b, n, won, best }) {
     const el = $('#pz-' + w.stage); el.classList.add('done'); el.querySelector('b').textContent = fmt(w.amount); el.querySelector('em').textContent = w.names.join(', ');
     const mine = S.mine.some((c) => w.cards.includes(c.id));
     say(`${ballText(b)}. ${w.stage === 'bingo' ? 'Bingo!' : STAGES[w.stage] + '!'} ${w.names.join(', ')} ganhou ${w.amount} fichas`, true);
-    addChat({ sys: true, t: `${STAGES[w.stage]} na bola ${n}: ${w.names.join(', ')} (+${fmt(w.amount)} fichas)` });
     if (mine) { $('.wp-t').textContent = STAGES[w.stage]; $('.wp-a').textContent = `Você ganhou ${fmt(w.amount)} fichas!`; $('#winPop').classList.remove('hide'); setTimeout(() => $('#winPop').classList.add('hide'), 3200); }
     else toast(`${STAGES[w.stage]}: ${w.names.join(', ')}`);
   }
@@ -163,26 +163,53 @@ $('#buyBtn').onclick = () => {
   sock.emit('buy', n, (r) => { $('#buyBtn').disabled = false; if (r.error) return toast(r.error); setMe(r.user); toast(`${n} cartela${n > 1 ? 's' : ''} comprada${n > 1 ? 's' : ''}! Boa sorte 🍀`); });
 };
 
-// chat
-function addChat(m) {
-  const d = document.createElement('div');
-  if (m.sys) { d.className = 'sys'; d.textContent = '🏆 ' + m.t; }
-  else { const b = document.createElement('b'); b.textContent = m.n + ': '; d.append(b, document.createTextNode(m.t)); }
-  const box = $('#chatList'); box.append(d); box.scrollTop = box.scrollHeight;
-}
-$('#chatForm').onsubmit = (e) => { e.preventDefault(); const v = $('#chatIn').value.trim(); if (v) sock.emit('say', v); $('#chatIn').value = ''; };
-
-async function loadRank() {
-  try {
-    const { list, history } = await api('ranking');
-    $('#rank').innerHTML = list.map((u) => `<li>${u.name.replace(/</g, '')}<b>${fmt(u.won)}</b></li>`).join('') || '<li>Ninguém ganhou ainda</li>';
-    $('#hist').innerHTML = history.map((h) => `<div><b>#${h.no}</b> · ${h.balls} bolas · ${h.cards} cartelas · Bingo: ${h.prizes.bingo ? h.prizes.bingo.names.join(', ').replace(/</g, '') : '—'}</div>`).join('') || '<div>Nenhuma rodada ainda</div>';
-  } catch {}
-}
-
 // início
 if (token) api('me').then((j) => { me = j.user; enter(); }).catch(() => localStorage.removeItem('bp_token'));
 
 $('#copyRef').onclick = () => { const i = $('#refLink'); i.select(); (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => toast('Link copiado!')).catch(() => { document.execCommand('copy'); toast('Link copiado!'); }); };
-$('#shareRef').onclick = () => { const url = $('#refLink').value, text = 'Bora jogar bingo comigo no BingoPix! Rodada a cada 5 minutos: '; if (navigator.share) navigator.share({ title: 'BingoPix', text, url }).catch(() => {}); else location.href = 'https://wa.me/?text=' + encodeURIComponent(text + url); };
+$('#shareRef').onclick = () => { const url = $('#refLink').value, text = 'Bora jogar bingo comigo no BingoPix! Rodada a cada 5 minutos: '; window.open('https://wa.me/?text=' + encodeURIComponent(text + url), '_blank'); return; location.href = 'https://wa.me/?text=' + encodeURIComponent(text + url); };
 if (savedRef && !token) { $('#refNote').textContent = '🎁 Você foi convidado! Crie sua conta pra jogar.'; $('#refNote').classList.remove('hide'); $$('.tabs button')[1].click(); }
+
+// ---------- menu e telas ----------
+const VIEWS = ['vivo', 'rodadas', 'especiais', 'carteira', 'extrato', 'vip', 'indique', 'historico', 'ajuda', 'perfil'];
+function openDrawer(o) { $('#drawer').classList.toggle('on', o); $('#drawerBg').classList.toggle('hide', !o); }
+$('#menuBtn').onclick = () => openDrawer(true);
+$('#drClose').onclick = $('#drawerBg').onclick = () => openDrawer(false);
+document.addEventListener('click', (e) => { const b = e.target.closest('[data-go]'); if (b) { go(b.dataset.go); openDrawer(false); } });
+window.onhashchange = () => go(location.hash.slice(1) || 'vivo', true);
+function go(v, fromHash) {
+  if (!VIEWS.includes(v)) v = 'vivo';
+  VIEWS.forEach((x) => $('#v-' + x).classList.toggle('hide', x !== v));
+  $$('.dr-items button, .dr-foot button').forEach((b) => b.classList.toggle('on', b.dataset.go === v));
+  if (!fromHash && location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v);
+  window.scrollTo(0, 0);
+  ({ rodadas: loadRodadas, especiais: loadRodadas, extrato: loadExtrato, historico: loadJogos, vip: loadVip }[v] || (() => {}))();
+}
+const dt = (t) => new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+const prizeNames = (p) => p ? p.names.map(esc).join(', ') : '—';
+async function loadRodadas() {
+  const j = await api('rodadas');
+  $('#spPool').textContent = fmt(j.specialPool);
+  $('#schedList').innerHTML = j.list.slice(0, 12).map((r, i) => `<div class="item ${r.special ? 'sp' : ''}"><div><b>${hhmm(r.at)}</b>${r.special ? ' <span class="badge">⭐ Especial</span>' : ''}<small>${i === 0 ? (S && S.phase === 'buy' ? 'Compras abertas agora' : 'Próxima') : 'Cartela ' + r.price + ' fichas'}</small></div><div class="r"><small>garantido</small><b>${fmt(r.min)}</b></div></div>`).join('');
+  $('#histList').innerHTML = j.history.map((h) => `<div class="item"><div><b>#${h.no} · ${hhmm(h.at)}</b>${h.special ? ' <span class="badge">⭐</span>' : ''}<small>${h.balls} bolas · ${h.cards} cartelas · Bingo: ${prizeNames(h.prizes.bingo)}</small></div><div class="r"><small>prêmio</small><b>${fmt(h.pool)}</b></div></div>`).join('') || '<p class="sub">Nenhuma rodada ainda.</p>';
+  $('#spList').innerHTML = j.list.filter((r) => r.special).slice(0, 6).map((r) => `<div class="item sp"><div><b>${dt(r.at)}</b><small>Quadra ${fmt(r.min * j.split.quadra)} · Quina ${fmt(r.min * j.split.quina)} · Bingo ${fmt(r.min * j.split.bingo)}</small></div><div class="r"><small>garantido</small><b>${fmt(r.min)}</b></div></div>`).join('') || '<p class="sub">A próxima especial aparece aqui.</p>';
+}
+async function loadExtrato() {
+  const { list } = await api('extrato');
+  $('#txList').innerHTML = list.map((t) => `<div class="item"><div><b>${esc(t.desc)}</b><small>${dt(t.at)} · saldo ${fmt(t.bal)}</small></div><div class="r ${t.amount < 0 ? 'neg' : 'pos'}"><b>${t.amount > 0 ? '+' : ''}${fmt(t.amount)}</b></div></div>`).join('') || '<p class="sub">Sem movimentações ainda.</p>';
+}
+async function loadJogos() {
+  const { list } = await api('jogos');
+  const nm = { quadra: 'Quadra', quina: 'Quina', bingo: 'Bingo' };
+  $('#gamesList').innerHTML = list.map((g) => `<div class="item ${g.won ? 'win' : ''}"><div><b>Rodada #${g.no} · ${dt(g.at)}</b>${g.special ? ' <span class="badge">⭐</span>' : ''}<small>${g.cards} cartela${g.cards > 1 ? 's' : ''} · ${fmt(g.spent)} fichas${g.prizes.length ? ' · ' + g.prizes.map((p) => nm[p]).join(', ') : ''}${g.cashback ? ' · cashback ' + g.cashback : ''}</small></div><div class="r ${g.won ? 'pos' : ''}"><small>ganhou</small><b>${fmt(g.won)}</b></div></div>`).join('') || '<p class="sub">Você ainda não jogou nenhuma rodada.</p>';
+}
+async function loadVip() {
+  const [{ user }, j] = await Promise.all([api('me'), api('rodadas')]); setMe(user);
+  const v = user.vip, pct = v.next ? Math.min(100, ((v.cards - v.min) / (v.next.min - v.min)) * 100) : 100;
+  $('#vipNow').innerHTML = `<small>Seu nível</small><b>👑 ${v.name}</b><div class="bar"><i style="width:${pct}%"></i></div><small>${v.next ? `${v.cards} de ${v.next.min} cartelas para ${v.next.name}` : 'Nível máximo!'}</small>`;
+  $('#vipLevels').innerHTML = j.vip.map((l, i) => `<div class="item ${i === v.i ? 'cur' : ''}"><div><b>${l.name}</b><small>a partir de ${l.min} cartelas</small></div><div class="r"><small>cashback</small><b>${Math.round(l.cashback * 100)}%</b></div></div>`).join('');
+}
+$('#pwForm').onsubmit = async (e) => {
+  e.preventDefault(); $('#pErr').textContent = '';
+  try { await api('perfil', { old: $('#pOld').value, pass: $('#pNew').value }); toast('Senha alterada!'); e.target.reset(); } catch (err) { $('#pErr').textContent = err.message; }
+};
