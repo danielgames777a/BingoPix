@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BingoPix - Bingo online</title>
+<meta name="theme-color" content="#0b0620">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="auth" class="auth">
+  <div class="auth-card">
+    <div class="logo big">Bingo<span>Pix</span></div>
+    <p class="tag">Rodada a cada 5 minutos, 24 horas · Quadra, Quina e Bingo · Ganhe <b>1.000 fichas</b> no cadastro</p>
+    <div id="refNote" class="refnote hide"></div>
+    <div class="tabs"><button data-t="login" class="on">Entrar</button><button data-t="register">Criar conta</button></div>
+    <form id="authForm">
+      <label>Usuário<input id="aName" autocomplete="username" maxlength="16" required></label>
+      <label>Senha<div class="pw"><input id="aPass" type="password" autocomplete="current-password" required><button type="button" id="eye">👁</button></div></label>
+      <label id="pass2Wrap" class="hide">Confirmar senha<input id="aPass2" type="password" autocomplete="new-password"></label>
+      <div id="aErr" class="err"></div>
+      <button class="btn big" id="aBtn">Entrar</button>
+    </form>
+    <div class="balls-deco"><i>7</i><i>23</i><i>45</i><i>61</i><i>88</i></div>
+  </div>
+</section>
+
+<!-- JOGO -->
+<section id="game" class="hide">
+  <header class="top">
+    <div class="logo">Bingo<span>Pix</span></div>
+    <div class="live"><i></i><b id="online">0</b> online</div>
+    <div class="wallet"><span>🪙</span><b id="bal">0</b><small>fichas</small></div>
+    <button id="voiceBtn" class="icon" title="Narração">🔊</button>
+    <button id="menuBtn" class="icon">☰</button>
+  </header>
+  <div id="menu" class="menu hide">
+    <div id="who"></div>
+    <button id="refill">Recarregar fichas grátis</button>
+    <button id="logout">Sair</button>
+  </div>
+
+  <main>
+    <div class="stage">
+      <div class="round-info">
+        <div><small>Rodada</small><b id="rNo">#0</b></div>
+        <div><small>Prêmio total</small><b id="pool">0</b></div>
+        <div><small>Cartelas</small><b id="nCards">0</b></div>
+      </div>
+
+      <div class="draw">
+        <div id="bigBall" class="bigball"><span>?</span></div>
+        <div class="draw-side">
+          <div id="status" class="status">Carregando…</div>
+          <div id="count" class="count"></div>
+          <div class="last" id="last"></div>
+          <div id="best" class="best"></div>
+        </div>
+      </div>
+      <div id="nearBox" class="near hide">
+        <div class="near-h"><b>🔥 Mais perto de ganhar</b><small>números que faltam</small></div>
+        <ol id="nearList"></ol>
+      </div>
+
+      <div class="prizes">
+        <div class="pz" id="pz-quadra"><small>Quadra</small><b>0</b><em></em></div>
+        <div class="pz" id="pz-quina"><small>Quina</small><b>0</b><em></em></div>
+        <div class="pz" id="pz-bingo"><small>Bingo</small><b>0</b><em></em></div>
+      </div>
+
+      <div id="buyBox" class="buy">
+        <div class="buy-row">
+          <button class="qty" data-d="-1">−</button>
+          <input id="qty" type="number" value="5" min="1" max="50">
+          <button class="qty" data-d="1">+</button>
+          <div class="quick"><button data-q="1">1</button><button data-q="10">10</button><button data-q="20">20</button><button data-q="50">50</button></div>
+        </div>
+        <button id="buyBtn" class="btn big">Comprar cartelas</button>
+        <div class="price">Cada cartela custa <b id="price">10</b> fichas</div>
+      </div>
+    </div>
+
+    <h3>Minhas cartelas <small id="myCount"></small></h3>
+    <div id="cards" class="cards"><p class="empty">Compre cartelas pra jogar a próxima rodada.</p></div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h3>Bolas sorteadas</h3>
+        <div id="board" class="board"></div>
+      </div>
+      <div class="panel">
+        <h3>Chat</h3>
+        <div id="chatList" class="chat"></div>
+        <form id="chatForm" class="chatf"><input id="chatIn" maxlength="140" placeholder="Mande um oi…"><button>➤</button></form>
+      </div>
+    </div>
+
+    <div class="panel invite">
+      <h3>🎁 Convide e ganhe</h3>
+      <p>Cada amigo que entrar pelo seu link e comprar a primeira cartela te dá <b id="refB">40</b> fichas pra comprar cartelas.</p>
+      <div class="reflink"><input id="refLink" readonly><button id="copyRef" class="btn">Copiar</button></div>
+      <div class="refstats"><span>Amigos: <b id="refN">0</b></span><span>Bônus ganho: <b id="refE">0</b> fichas</span><button id="shareRef">Compartilhar</button></div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel"><h3>🏆 Ranking</h3><ol id="rank" class="rank"></ol></div>
+      <div class="panel"><h3>Últimas rodadas</h3><div id="hist" class="hist"></div></div>
+    </div>
+  </main>
+  <footer>BingoPix · Fichas são só para jogar e não podem ser trocadas por dinheiro.</footer>
+</section>
+
+<div id="toast" class="toast"></div>
+<div id="winPop" class="winpop hide"><div><div class="wp-t"></div><div class="wp-a"></div></div></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
