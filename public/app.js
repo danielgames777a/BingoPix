@@ -84,7 +84,7 @@ function render(newRound) {
   renderCards();
   clearInterval(timer);
   if (S.phase === 'buy') { tickCount(); timer = setInterval(tickCount, 250); $('#status').textContent = `Próximo sorteio ${hhmm(S.endsAt)}`; $('#best').textContent = `${S.players} jogadores · compras abertas`; $('#nearBox').classList.add('hide'); }
-  else if (S.phase === 'draw') { if (!S.balls.length) say('Atenção, vai começar o sorteio! Boa sorte a todos.'); $('#status').textContent = 'Sorteio ao vivo'; $('#best').textContent = ''; $('#count').textContent = 'ORDEM ' + S.balls.length; showBest(S.best); }
+  else if (S.phase === 'draw') { if (!S.balls.length) voz('start'); $('#status').textContent = 'Sorteio ao vivo'; $('#best').textContent = ''; $('#count').textContent = 'ORDEM ' + S.balls.length; showBest(S.best); }
   else { $('#nearBox').classList.add('hide'); $('#status').textContent = 'Rodada encerrada'; $('#count').textContent = 'ORDEM ' + S.balls.length; $('#best').textContent = 'Próxima rodada abrindo…'; }
 }
 function tickCount() {
@@ -111,35 +111,27 @@ function showBest(b) {
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- narração ----------
-let voiceOn = localStorage.getItem('bp_voice') !== '0', ptVoice = null, voiceReady = false;
-const hasTTS = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-function pickVoice() { const v = speechSynthesis.getVoices(); ptVoice = v.find((x) => /pt[-_]BR/i.test(x.lang)) || v.find((x) => /^pt/i.test(x.lang)) || null; }
-if (hasTTS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speakNow(t) {
-  const u = new SpeechSynthesisUtterance(t); u.lang = 'pt-BR'; if (ptVoice) u.voice = ptVoice; u.rate = 1; u.volume = 1;
-  speechSynthesis.resume(); speechSynthesis.speak(u);
-}
-function say(t, urgent) {
-  if (!voiceOn || !hasTTS) return;
+// narração com voz masculina gravada (arquivos em /voz)
+let voiceOn = localStorage.getItem('bp_voice') !== '0', voiceReady = false;
+const player = new Audio(); player.preload = 'auto';
+const vq = [];
+function playNext() { if (!vq.length) return; player.src = '/voz/' + vq.shift() + '.mp3'; player.play().catch(() => { voiceReady = false; $('#voiceTip').classList.remove('hide'); }); }
+player.onended = playNext;
+function voz(keys, urgent) {
+  if (!voiceOn) return;
   if (!voiceReady) { $('#voiceTip').classList.remove('hide'); return; }
-  // no Android, falar logo depois de cancel() é ignorado: espera um pouco
-  if (urgent && (speechSynthesis.speaking || speechSynthesis.pending)) { speechSynthesis.cancel(); setTimeout(() => speakNow(t), 120); }
-  else speakNow(t);
+  if (urgent) { vq.length = 0; }
+  vq.push(...[].concat(keys));
+  if (urgent || player.paused || player.ended) playNext();
 }
-function unlockVoice() {
-  if (!hasTTS) { toast('Este navegador não fala. Abra no Chrome.'); return; }
-  voiceReady = true; $('#voiceTip').classList.add('hide');
-  pickVoice(); speakNow('Narração ligada');
-}
-function ballText(b) { const d = String(b).split(''); return d.length === 2 ? `${d[0]}, ${d[1]}. ${b}` : `Número ${b}`; }
+function unlockVoice() { voiceReady = true; $('#voiceTip').classList.add('hide'); vq.length = 0; vq.push('on'); playNext(); }
+// pré-carrega as vozes
+setTimeout(() => { for (let n = 1; n <= 90; n++) fetch('/voz/' + n + '.mp3').catch(() => {}); }, 3000);
 function setVoiceBtn() { $('#voiceBtn').textContent = voiceOn ? '🔊' : '🔇'; $('#voiceBtn').classList.toggle('off', !voiceOn); }
-$('#voiceBtn').onclick = (e) => { e.stopPropagation(); voiceOn = !voiceOn; localStorage.setItem('bp_voice', voiceOn ? '1' : '0'); setVoiceBtn(); if (voiceOn) unlockVoice(); else { speechSynthesis.cancel(); $('#voiceTip').classList.add('hide'); } };
+$('#voiceBtn').onclick = (e) => { e.stopPropagation(); voiceOn = !voiceOn; localStorage.setItem('bp_voice', voiceOn ? '1' : '0'); setVoiceBtn(); if (voiceOn) unlockVoice(); else { player.pause(); vq.length = 0; $('#voiceTip').classList.add('hide'); } };
 setVoiceBtn();
 $('#voiceTip').onclick = (e) => { e.stopPropagation(); voiceOn = true; localStorage.setItem('bp_voice', '1'); setVoiceBtn(); unlockVoice(); };
-// Chrome do celular só libera a voz depois de um toque na tela
-document.addEventListener('click', function prime() { if (voiceOn && hasTTS && !voiceReady) unlockVoice(); }, { once: true });
-// mantém a fala viva (Chrome pausa sozinho às vezes)
-setInterval(() => { if (hasTTS && voiceReady) speechSynthesis.resume(); }, 5000);
+document.addEventListener('click', () => { if (voiceOn && !voiceReady) unlockVoice(); }, { once: true });
 
 function renderCards() {
   const drawn = new Set(S.balls);
@@ -163,12 +155,12 @@ function onBall({ b, n, won, best }) {
   const bb = $('#bigBall'); bb.querySelector('span').textContent = b; bb.classList.remove('pop'); void bb.offsetWidth; bb.classList.add('pop');
   paintBoard(); $('#count').textContent = 'ORDEM ' + n;
   drawLast(); showBest(best); renderCards();
-  if (!won.length) say(ballText(b), true);
+  voz(String(b), true);
   for (const w of won) {
     S.prizes[w.stage] = { amount: w.amount, names: w.names };
     const el = $('#pz-' + w.stage); el.classList.add('done'); markCur(); el.querySelector('b').textContent = fmt(w.amount); el.querySelector('em').textContent = w.names.join(', ');
     const mine = S.mine.some((c) => w.cards.includes(c.id));
-    say(`${ballText(b)}. ${w.stage === 'bingo' ? 'Bingo!' : STAGES[w.stage] + '!'} ${w.names.join(', ')} ganhou ${w.amount} fichas`, true);
+    voz(w.stage);
     if (mine) { $('.wp-t').textContent = STAGES[w.stage]; $('.wp-a').textContent = `Você ganhou ${fmt(w.amount)} fichas!`; $('#winPop').classList.remove('hide'); setTimeout(() => $('#winPop').classList.add('hide'), 3200); }
     else toast(`${STAGES[w.stage]}: ${w.names.join(', ')}`);
   }
