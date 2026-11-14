@@ -1,9 +1,9 @@
 {
   "name": "bingopix",
   "version": "0.1.0",
-  "description": "BingoPix - bingo online de teste com fichas (sem dinheiro real)",
+  "description": "BingoPix - protótipo de bingo com carteira simulada em reais",
   "main": "server/index.js",
-  "scripts": { "start": "node server/index.js" },
+  "scripts": { "start": "node server/index.js", "test": "node --test server/*.test.js" },
   "engines": { "node": ">=18" },
   "dependencies": {
     "bcryptjs": "^2.4.3",
