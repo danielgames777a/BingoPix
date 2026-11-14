@@ -111,21 +111,35 @@ function showBest(b) {
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- narração ----------
-let voiceOn = localStorage.getItem('bp_voice') !== '0', ptVoice = null;
+let voiceOn = localStorage.getItem('bp_voice') !== '0', ptVoice = null, voiceReady = false;
+const hasTTS = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 function pickVoice() { const v = speechSynthesis.getVoices(); ptVoice = v.find((x) => /pt[-_]BR/i.test(x.lang)) || v.find((x) => /^pt/i.test(x.lang)) || null; }
-if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+if (hasTTS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speakNow(t) {
+  const u = new SpeechSynthesisUtterance(t); u.lang = 'pt-BR'; if (ptVoice) u.voice = ptVoice; u.rate = 1; u.volume = 1;
+  speechSynthesis.resume(); speechSynthesis.speak(u);
+}
 function say(t, urgent) {
-  if (!voiceOn || !('speechSynthesis' in window)) return;
-  if (urgent) speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(t); u.lang = 'pt-BR'; if (ptVoice) u.voice = ptVoice; u.rate = 1.05;
-  speechSynthesis.speak(u);
+  if (!voiceOn || !hasTTS) return;
+  if (!voiceReady) { $('#voiceTip').classList.remove('hide'); return; }
+  // no Android, falar logo depois de cancel() é ignorado: espera um pouco
+  if (urgent && (speechSynthesis.speaking || speechSynthesis.pending)) { speechSynthesis.cancel(); setTimeout(() => speakNow(t), 120); }
+  else speakNow(t);
+}
+function unlockVoice() {
+  if (!hasTTS) { toast('Este navegador não fala. Abra no Chrome.'); return; }
+  voiceReady = true; $('#voiceTip').classList.add('hide');
+  pickVoice(); speakNow('Narração ligada');
 }
 function ballText(b) { const d = String(b).split(''); return d.length === 2 ? `${d[0]}, ${d[1]}. ${b}` : `Número ${b}`; }
 function setVoiceBtn() { $('#voiceBtn').textContent = voiceOn ? '🔊' : '🔇'; $('#voiceBtn').classList.toggle('off', !voiceOn); }
-$('#voiceBtn').onclick = () => { voiceOn = !voiceOn; localStorage.setItem('bp_voice', voiceOn ? '1' : '0'); setVoiceBtn(); if (voiceOn) say('Narração ligada'); else speechSynthesis.cancel(); };
+$('#voiceBtn').onclick = (e) => { e.stopPropagation(); voiceOn = !voiceOn; localStorage.setItem('bp_voice', voiceOn ? '1' : '0'); setVoiceBtn(); if (voiceOn) unlockVoice(); else { speechSynthesis.cancel(); $('#voiceTip').classList.add('hide'); } };
 setVoiceBtn();
-// Android/Chrome só libera a voz depois de um toque na tela
-document.addEventListener('click', function prime() { if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(''); speechSynthesis.speak(u); } document.removeEventListener('click', prime); });
+$('#voiceTip').onclick = (e) => { e.stopPropagation(); voiceOn = true; localStorage.setItem('bp_voice', '1'); setVoiceBtn(); unlockVoice(); };
+// Chrome do celular só libera a voz depois de um toque na tela
+document.addEventListener('click', function prime() { if (voiceOn && hasTTS && !voiceReady) unlockVoice(); }, { once: true });
+// mantém a fala viva (Chrome pausa sozinho às vezes)
+setInterval(() => { if (hasTTS && voiceReady) speechSynthesis.resume(); }, 5000);
 
 function renderCards() {
   const drawn = new Set(S.balls);
