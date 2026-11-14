@@ -118,7 +118,7 @@ let R = null;
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function makeCard() {
   const nums = shuffle(Array.from({ length: 90 }, (_, i) => i + 1)).slice(0, 15);
-  return { id: crypto.randomBytes(4).toString('hex'), rows: [nums.slice(0, 5), nums.slice(5, 10), nums.slice(10, 15)].map((r) => r.sort((a, b) => a - b)) };
+  return { id: String(10000 + crypto.randomInt(190000)), rows: [nums.slice(0, 5), nums.slice(5, 10), nums.slice(10, 15)].map((r) => r.sort((a, b) => a - b)) };
 }
 const AUTO_NAMES = ['Lucas', 'Maria', 'Rafa_gyn', 'Bia.santos', 'Thiago', 'Duda', 'Carlos77', 'Lu_bingo', 'Pedrinho', 'Jessica'].slice(0, AUTO);
 
@@ -182,9 +182,16 @@ function checkWinners() {
 }
 
 function bestToGo() {
-  const list = R.cards.map((c) => ({ name: c.ownerName, id: c.id, need: c.rows.flat().filter((n) => !R.drawn.has(n)).sort((a, b) => a - b) }))
-    .filter((x) => x.need.length).sort((a, b) => a.need.length - b.need.length).slice(0, 5);
-  return { top: list };
+  // top 10 cartelas mais perto do prêmio que está valendo agora, com os números que faltam
+  const stage = !R.prizes.quadra ? 'quadra' : !R.prizes.quina ? 'quina' : 'bingo';
+  const list = R.cards.map((c) => {
+    const miss = c.rows.map((r) => r.filter((n) => !R.drawn.has(n)));
+    let need, cnt;
+    if (stage === 'bingo') { need = miss.flat().sort((a, b) => a - b); cnt = need.length; }
+    else { const best = miss.slice().sort((a, b) => a.length - b.length)[0]; need = best; cnt = stage === 'quadra' ? Math.max(0, best.length - 1) : best.length; }
+    return { cupom: c.id, name: c.ownerName, need, cnt };
+  }).sort((a, b) => a.cnt - b.cnt || a.need.length - b.need.length).slice(0, 10);
+  return { stage, top: list };
 }
 
 function finish() {

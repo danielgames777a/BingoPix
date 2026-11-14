@@ -180,3 +180,41 @@ summary{font-weight:800;cursor:pointer}details p{color:var(--muted);margin-top:8
 .pwform label{display:block;font-size:13px;color:var(--muted);margin-bottom:12px}
 .pwform input{display:block;width:100%;margin-top:5px;background:var(--bg);border:1px solid var(--line);color:#fff;border-radius:11px;padding:12px;outline:0}
 #v-vivo .panel{margin-top:12px}
+
+/* tela de sorteio estilo bingo de salão */
+.stage.bb{background:linear-gradient(180deg,#2a0f5e,#14072f);border:1px solid #5b2bb5;padding:12px}
+.ptabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.ptabs .pz{background:#2e2a3d;border:2px solid transparent;border-radius:10px;padding:8px 4px}
+.ptabs .pz small{color:#fff;text-transform:none;letter-spacing:0;font-size:12px}
+.ptabs .pz b{font:800 19px Inter;color:#fff}
+.ptabs .pz.cur{background:#1b1460;border-color:var(--yel)}
+.ptabs .pz.done{background:rgba(46,229,157,.15);border-color:var(--grn)}
+.vgrid{display:grid;grid-template-columns:31% 1fr 70px;gap:8px;align-items:center}
+.infos{display:flex;flex-direction:column;gap:7px}
+.infos div{background:#2b1670;border-radius:9px;text-align:center;padding:5px 4px}
+.infos small{display:block;background:#160a4a;color:var(--yel);font:800 13px Inter;border-radius:6px;margin:0 4px 3px;padding:2px}
+.infos b{font:600 14px Inter;color:#fff}
+.ballzone{display:grid;place-items:center}
+.stage.bb .bigball{width:150px;height:150px;border:3px solid #fff;box-shadow:0 0 30px rgba(255,63,164,.6),inset -10px -12px 24px rgba(0,0,0,.35)}
+.stage.bb .bigball span{width:96px;height:96px;font-size:54px;border:3px solid #ddd}
+.prev{display:flex;flex-direction:column;align-items:center;gap:10px}
+.prev i{font-style:normal;width:62px;height:62px;border-radius:50%;border:3px solid #fff;display:grid;place-items:center;font:800 22px "Baloo 2";color:#1a0b3a}
+.prev i:nth-child(2){width:54px;height:54px}.prev i:nth-child(3){width:46px;height:46px;font-size:18px}
+.prev i.f{background:radial-gradient(circle at 50% 50%,#fff 0 46%,#2c4bd6 48%,#132783 100%)}
+.statusbar{display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;gap:8px}
+.statusbar .status{font:800 16px Inter}.statusbar .best{color:var(--muted);font-size:12px}
+.ordem{background:#120a05;color:var(--yel);font:800 22px Inter;border-radius:10px;padding:6px 12px;white-space:nowrap}
+.smallstats{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:8px}.smallstats b{color:var(--yel)}
+.board15{display:grid;grid-template-columns:repeat(15,1fr);gap:2px;background:#2b1670;border-radius:10px;padding:6px}
+.board15 i{font-style:normal;background:#3a3a46;color:#bbb;text-align:center;font:600 12px Inter;padding:3px 0;border-radius:2px}
+.board15 i.on{background:#15b84a;color:#fff}.board15 i.cur{background:#e01b1b;color:#fff}
+.tbl{margin-top:12px;background:#2b1670;border-radius:10px;padding:6px}
+.tbl .tr{display:grid;grid-template-columns:22% 38% 40%;gap:3px;margin-bottom:3px}
+.tbl .th span{color:var(--yel);font:800 15px Inter;text-align:center;padding:4px 0}
+.tbl .tr:not(.th) span{background:#fff;color:#111;font:600 14px Inter;padding:5px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;border-radius:2px}
+.tbl .cp{color:#e01b1b!important;font-weight:800!important}
+.tbl .nd{display:flex;gap:2px;padding:2px!important}
+.tbl .nd i{flex:1;font-style:normal;background:#3b1c8f;color:#fff;font:800 13px Inter;display:grid;place-items:center;border-radius:2px;min-height:22px}
+.tbl .nd i.g{background:#999}.tbl .nd i.more{background:#e01b1b}
+.tbl .tr.me span:not(.nd){background:#d7ffe9}
+@media(max-width:380px){.stage.bb .bigball{width:120px;height:120px}.stage.bb .bigball span{width:78px;height:78px;font-size:42px}.board15 i{font-size:10px}}

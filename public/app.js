@@ -65,7 +65,8 @@ function connect() {
 
 function render(newRound) {
   $('#online').textContent = S.online;
-  $('#rNo').textContent = '#' + S.no;
+  $('#rNo').textContent = String(S.no).padStart(6, '0');
+  const d = new Date(S.endsAt); $('#vDate').textContent = d.toLocaleDateString('pt-BR'); $('#vTime').textContent = d.toLocaleTimeString('pt-BR');
   $('#pool').textContent = fmt(S.pool);
   $('#nCards').textContent = S.nCards;
   $('#price').textContent = S.price; $('#refB').textContent = S.refBonus; $('#specialTag').classList.toggle('hide', !S.special);
@@ -75,29 +76,37 @@ function render(newRound) {
     el.querySelector('em').textContent = p ? p.names.join(', ') : '';
     el.classList.toggle('done', !!p);
   }
+  markCur();
   $('#buyBox').classList.toggle('hide', S.phase !== 'buy');
-  $$('#board i').forEach((i) => i.classList.remove('on'));
-  S.balls.forEach((b) => $('#b' + b).classList.add('on'));
+  paintBoard();
   if (newRound && S.phase === 'buy') { $('#bigBall span').textContent = '?'; }
   drawLast();
   renderCards();
   clearInterval(timer);
-  if (S.phase === 'buy') { tickCount(); timer = setInterval(tickCount, 250); $('#status').textContent = `Rodada das ${hhmm(S.endsAt)}`; $('#best').textContent = `${S.players} jogadores · compre suas cartelas!`; $('#nearBox').classList.add('hide'); }
-  else if (S.phase === 'draw') { if (!S.balls.length) say('Atenção, vai começar o sorteio! Boa sorte a todos.'); $('#status').textContent = 'Sorteando…'; $('#count').textContent = S.balls.length + '/90'; showBest(S.best); }
-  else { $('#nearBox').classList.add('hide'); $('#status').textContent = 'Rodada encerrada'; $('#count').textContent = 'Já já'; $('#best').textContent = 'Próxima rodada abrindo…'; }
+  if (S.phase === 'buy') { tickCount(); timer = setInterval(tickCount, 250); $('#status').textContent = `Próximo sorteio ${hhmm(S.endsAt)}`; $('#best').textContent = `${S.players} jogadores · compras abertas`; $('#nearBox').classList.add('hide'); }
+  else if (S.phase === 'draw') { if (!S.balls.length) say('Atenção, vai começar o sorteio! Boa sorte a todos.'); $('#status').textContent = 'Sorteio ao vivo'; $('#best').textContent = ''; $('#count').textContent = 'ORDEM ' + S.balls.length; showBest(S.best); }
+  else { $('#nearBox').classList.add('hide'); $('#status').textContent = 'Rodada encerrada'; $('#count').textContent = 'ORDEM ' + S.balls.length; $('#best').textContent = 'Próxima rodada abrindo…'; }
 }
 function tickCount() {
   const left = Math.max(0, Math.ceil((S.endsAt - (Date.now() + skew)) / 1000));
   $('#count').textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
   if (!left) $('#status').textContent = 'Começando…';
 }
-function drawLast() { $('#last').innerHTML = S.balls.slice(-6).reverse().map((b) => `<i>${b}</i>`).join(''); }
+function drawLast() { const p = S.balls.slice(0, -1).slice(-3).reverse(); $('#prev').innerHTML = [0, 1, 2].map((i) => `<i class="${p[i] ? 'f' : ''}">${p[i] || ''}</i>`).join(''); if (S.balls.length) $('#bigBall span').textContent = S.balls[S.balls.length - 1]; }
+function paintBoard() { $$('#board i').forEach((i) => (i.className = '')); S.balls.forEach((b, i) => ($('#b' + b).className = i === S.balls.length - 1 ? 'cur' : 'on')); }
+function markCur() { const st = !S.prizes.quadra ? 'quadra' : !S.prizes.quina ? 'quina' : 'bingo'; ['quadra', 'quina', 'bingo'].forEach((k) => $('#pz-' + k).classList.toggle('cur', k === st && S.phase !== 'end')); }
 function showBest(b) {
-  $('#best').textContent = '';
   const top = (b && b.top) || [];
   $('#nearBox').classList.toggle('hide', !top.length);
+  if (!top.length) return;
+  $('#faltamH').textContent = 'FALTAM · ' + { quadra: 'QUADRA', quina: 'QUINA', bingo: 'BINGO' }[b.stage];
   const mine = new Set(S ? S.mine.map((c) => c.id) : []);
-  $('#nearList').innerHTML = top.map((x, i) => `<li class="${mine.has(x.id) ? 'me' : ''}"><span class="pos">${i + 1}</span><span class="nm">${esc(x.name)}</span><span class="nd">${x.need.map((n) => `<i>${n}</i>`).join('')}</span></li>`).join('');
+  $('#nearList').innerHTML = top.map((x) => {
+    let nums = x.need.slice(0, 5), extra = x.need.length - 5;
+    if (extra > 0) nums = x.need.slice(0, 4);
+    const cells = nums.map((n) => `<i>${n}</i>`).join('') + (extra > 0 ? `<i class="more">+${extra + 1}</i>` : '') + '<i class="g"></i>'.repeat(Math.max(0, 5 - nums.length - (extra > 0 ? 1 : 0)));
+    return `<div class="tr ${mine.has(x.cupom) ? 'me' : ''}"><span class="cp">${x.cupom}</span><span class="nm">${esc(x.name)}</span><span class="nd">${cells}</span></div>`;
+  }).join('');
 }
 const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -129,7 +138,7 @@ function renderCards() {
   }).sort((a, b) => a.left - b.left);
   $('#cards').innerHTML = cards.map(({ c, hits, left }) => `
     <div class="card ${left === 0 ? 'win' : left <= 2 ? 'near' : ''}" id="c-${c.id}">
-      <div class="ch"><span>Cartela ${c.id.toUpperCase()}</span><b>${left === 0 ? 'BINGO!' : 'faltam ' + left}</b></div>
+      <div class="ch"><span>Cupom ${c.id}</span><b>${left === 0 ? 'BINGO!' : 'faltam ' + left}</b></div>
       ${c.rows.map((r, i) => `<div class="row ${hits[i] === 5 ? 'full' : ''}">${r.map((n) => `<div class="n ${drawn.has(n) ? 'hit' : ''}">${n}</div>`).join('')}</div>`).join('')}
     </div>`).join('');
 }
@@ -138,12 +147,12 @@ function onBall({ b, n, won, best }) {
   if (!S) return;
   S.balls.push(b);
   const bb = $('#bigBall'); bb.querySelector('span').textContent = b; bb.classList.remove('pop'); void bb.offsetWidth; bb.classList.add('pop');
-  $('#b' + b).classList.add('on'); $('#count').textContent = n + '/90';
+  paintBoard(); $('#count').textContent = 'ORDEM ' + n;
   drawLast(); showBest(best); renderCards();
   if (!won.length) say(ballText(b), true);
   for (const w of won) {
     S.prizes[w.stage] = { amount: w.amount, names: w.names };
-    const el = $('#pz-' + w.stage); el.classList.add('done'); el.querySelector('b').textContent = fmt(w.amount); el.querySelector('em').textContent = w.names.join(', ');
+    const el = $('#pz-' + w.stage); el.classList.add('done'); markCur(); el.querySelector('b').textContent = fmt(w.amount); el.querySelector('em').textContent = w.names.join(', ');
     const mine = S.mine.some((c) => w.cards.includes(c.id));
     say(`${ballText(b)}. ${w.stage === 'bingo' ? 'Bingo!' : STAGES[w.stage] + '!'} ${w.names.join(', ')} ganhou ${w.amount} fichas`, true);
     if (mine) { $('.wp-t').textContent = STAGES[w.stage]; $('.wp-a').textContent = `Você ganhou ${fmt(w.amount)} fichas!`; $('#winPop').classList.remove('hide'); setTimeout(() => $('#winPop').classList.add('hide'), 3200); }
@@ -156,7 +165,7 @@ $('#winPop').onclick = () => $('#winPop').classList.add('hide');
 $$('.qty').forEach((b) => b.onclick = () => { const i = $('#qty'); i.value = Math.max(1, Math.min(50, (+i.value || 1) + +b.dataset.d)); updBuy(); });
 $$('.quick button').forEach((b) => b.onclick = () => { $('#qty').value = b.dataset.q; updBuy(); });
 $('#qty').oninput = updBuy;
-function updBuy() { const n = +$('#qty').value || 1; $('#buyBtn').textContent = `Comprar ${n} cartela${n > 1 ? 's' : ''} · ${fmt(n * (S ? S.price : 10))} fichas`; }
+function updBuy() { const n = +$('#qty').value || 1; $('#buyBtn').textContent = `Comprar ${n} cartela${n > 1 ? 's' : ''} · ${fmt(n * (S ? S.price : 20))} fichas`; }
 updBuy();
 $('#buyBtn').onclick = () => {
   const n = +$('#qty').value || 1; $('#buyBtn').disabled = true;

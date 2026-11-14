@@ -67,30 +67,34 @@
   <main>
     <!-- SORTEIO AO VIVO -->
     <div class="view" id="v-vivo">
-      <div class="stage">
+      <div class="stage bb">
         <div id="specialTag" class="special-tag hide">⭐ RODADA ESPECIAL · prêmio turbinado</div>
-        <div class="round-info">
-          <div><small>Rodada</small><b id="rNo">#0</b></div>
-          <div><small>Prêmio total</small><b id="pool">0</b></div>
-          <div><small>Cartelas</small><b id="nCards">0</b></div>
+        <div class="ptabs">
+          <div class="pz" id="pz-quadra"><small>Prêmio 1 · Quadra</small><b>0</b><em></em></div>
+          <div class="pz" id="pz-quina"><small>Prêmio 2 · Quina</small><b>0</b><em></em></div>
+          <div class="pz" id="pz-bingo"><small>Prêmio 3 · Bingo</small><b>0</b><em></em></div>
         </div>
-        <div class="draw">
-          <div id="bigBall" class="bigball"><span>?</span></div>
-          <div class="draw-side">
-            <div id="status" class="status">Carregando…</div>
-            <div id="count" class="count"></div>
-            <div class="last" id="last"></div>
-            <div id="best" class="best"></div>
+        <div class="vgrid">
+          <div class="infos">
+            <div><small>Sorteio</small><b id="rNo">0</b></div>
+            <div><small>Cartela</small><b><span id="price">20</span> fichas</b></div>
+            <div><small>Data</small><b id="vDate">-</b></div>
+            <div><small>Hora</small><b id="vTime">-</b></div>
           </div>
+          <div class="ballzone">
+            <div id="bigBall" class="bigball"><span>?</span></div>
+          </div>
+          <div id="prev" class="prev"><i></i><i></i><i></i></div>
         </div>
-        <div id="nearBox" class="near hide">
-          <div class="near-h"><b>🔥 Mais perto de ganhar</b><small>números que faltam</small></div>
-          <ol id="nearList"></ol>
+        <div class="statusbar">
+          <div><div id="status" class="status">Carregando…</div><div id="best" class="best"></div></div>
+          <div id="count" class="ordem">--</div>
         </div>
-        <div class="prizes">
-          <div class="pz" id="pz-quadra"><small>Quadra</small><b>0</b><em></em></div>
-          <div class="pz" id="pz-quina"><small>Quina</small><b>0</b><em></em></div>
-          <div class="pz" id="pz-bingo"><small>Bingo</small><b>0</b><em></em></div>
+        <div class="smallstats"><span>Prêmio total <b id="pool">0</b></span><span>Cartelas <b id="nCards">0</b></span></div>
+        <div id="board" class="board15"></div>
+        <div id="nearBox" class="tbl hide">
+          <div class="tr th"><span>CUPOM</span><span>JOGADOR</span><span id="faltamH">FALTAM</span></div>
+          <div id="nearList"></div>
         </div>
         <div id="buyBox" class="buy">
           <div class="buy-row">
@@ -100,12 +104,10 @@
             <div class="quick"><button data-q="1">1</button><button data-q="10">10</button><button data-q="20">20</button><button data-q="50">50</button></div>
           </div>
           <button id="buyBtn" class="btn big">Comprar cartelas</button>
-          <div class="price">Cada cartela custa <b id="price">20</b> fichas</div>
         </div>
       </div>
       <h3>Minhas cartelas <small id="myCount"></small></h3>
       <div id="cards" class="cards"></div>
-      <div class="panel"><h3>Bolas sorteadas</h3><div id="board" class="board"></div></div>
     </div>
 
     <!-- RODADAS -->
