@@ -39,7 +39,7 @@ $('#logout').onclick = () => { localStorage.removeItem('bp_token'); location.rel
 $('#refill').onclick = async () => { try { const j = await api('refill', {}); setMe(j.user); toast('+1.000 fichas'); } catch (e) { toast(e.message); } };
 
 function setMe(u) {
-  me = u; $('#bal').textContent = fmt(u.balance);
+  me = u; $('#bal').textContent = fmt(u.balance); $('#bSaldo').textContent = fmt(u.balance); $('#sSaldo').textContent = fmt(u.balance);
   $('#refLink').value = location.origin + '/?ref=' + u.ref; $('#refN').textContent = u.refs; $('#refE').textContent = fmt(u.refEarned);
   $('#drName').textContent = u.name.toUpperCase(); $('#drVip').textContent = '👑 VIP ' + u.vip.name;
   $('#wBal').textContent = fmt(u.balance); $('#wWon').textContent = fmt(u.won); $('#wWins').textContent = u.wins; $('#wRef').textContent = fmt(u.refEarned);
@@ -78,6 +78,11 @@ function render(newRound) {
   }
   markCur();
   $('#buyBox').classList.toggle('hide', S.phase !== 'buy');
+  $('#buyView').classList.toggle('hide', S.phase !== 'buy'); $('#drawView').classList.toggle('hide', S.phase === 'buy');
+  $('#bRNo').textContent = String(S.no).padStart(6, '0'); $('#bPrice').textContent = S.price + ' fichas';
+  { const d = new Date(S.endsAt); $('#bTime').textContent = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + hhmm(S.endsAt); }
+  ['quadra', 'quina', 'bingo'].forEach((k, i) => ($('#bp' + (i + 1)).textContent = fmt(S.prizes[k] ? S.prizes[k].amount : Math.floor(S.pool * S.split[k])) + ' fichas'));
+  $('#sComp').textContent = S.mine.length; updBuy();
   paintBoard();
   if (newRound && S.phase === 'buy') { $('#bigBall span').textContent = '?'; }
   drawLast();
@@ -91,6 +96,8 @@ function tickCount() {
   const left = Math.max(0, Math.ceil((S.endsAt - (Date.now() + skew)) / 1000));
   $('#count').textContent = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
   if (!left) $('#status').textContent = 'Começando…';
+  const m = String(Math.min(99, Math.floor(left / 60))).padStart(2, '0'), ss = String(left % 60).padStart(2, '0');
+  $('#cd1').textContent = m[0]; $('#cd2').textContent = m[1]; $('#cd3').textContent = ss[0]; $('#cd4').textContent = ss[1];
 }
 function drawLast() { const p = S.balls.slice(0, -1).slice(-3).reverse(); $('#prev').innerHTML = [0, 1, 2].map((i) => `<i class="${p[i] ? 'f' : ''}">${p[i] || ''}</i>`).join(''); if (S.balls.length) $('#bigBall span').textContent = S.balls[S.balls.length - 1]; }
 function paintBoard() { $$('#board i').forEach((i) => (i.className = '')); S.balls.forEach((b, i) => ($('#b' + b).className = i === S.balls.length - 1 ? 'cur' : 'on')); }
@@ -168,10 +175,10 @@ function onBall({ b, n, won, best }) {
 $('#winPop').onclick = () => $('#winPop').classList.add('hide');
 
 // compra
-$$('.qty').forEach((b) => b.onclick = () => { const i = $('#qty'); i.value = Math.max(1, Math.min(50, (+i.value || 1) + +b.dataset.d)); updBuy(); });
-$$('.quick button').forEach((b) => b.onclick = () => { $('#qty').value = b.dataset.q; updBuy(); });
+$$('.qty').forEach((b) => b.onclick = () => { const i = $('#qty'); i.value = Math.max(1, Math.min(200, (+i.value || 1) + +b.dataset.d)); updBuy(); });
+$$('.quick2 button').forEach((b) => b.onclick = () => { $('#qty').value = b.dataset.q; updBuy(); });
 $('#qty').oninput = updBuy;
-function updBuy() { const n = +$('#qty').value || 1; $('#buyBtn').textContent = `Comprar ${n} cartela${n > 1 ? 's' : ''} · ${fmt(n * (S ? S.price : 20))} fichas`; }
+function updBuy() { const n = +$('#qty').value || 1; $('#bTotal').textContent = fmt(n * (S ? S.price : 20)) + ' fichas'; }
 updBuy();
 $('#buyBtn').onclick = () => {
   const n = +$('#qty').value || 1; $('#buyBtn').disabled = true;

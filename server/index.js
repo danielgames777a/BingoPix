@@ -11,7 +11,7 @@ const { Server } = require('socket.io');
 const PORT = +process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'bingopix-' + crypto.randomBytes(8).toString('hex');
 const ROUND_MIN = +process.env.ROUND_MIN || 5;       // rodada a cada N minutos pelo relógio (22:50, 22:55...)
-const DRAW_MS = +process.env.DRAW_MS || 2000;        // ms entre bolas
+const DRAW_MS = +process.env.DRAW_MS || 3000;        // ms entre bolas
 const CARD_PRICE = +process.env.CARD_PRICE || 20;    // fichas por cartela
 const AUTO = process.env.AUTO_PLAYERS != null ? +process.env.AUTO_PLAYERS : 10; // jogadores automáticos sempre online
 const WELCOME = 1000;

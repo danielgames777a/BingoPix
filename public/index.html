@@ -70,12 +70,20 @@
       <div class="stage bb">
         <div id="specialTag" class="special-tag hide">⭐ RODADA ESPECIAL · prêmio turbinado</div>
         <button id="voiceTip" class="voice-tip">🔊 Toque aqui para ouvir a narração dos números</button>
-        <div class="ptabs">
+        <div id="buyView" class="buyview">
+          <div class="cd"><i id="cd1">0</i><i id="cd2">0</i><span>:</span><i id="cd3">0</i><i id="cd4">0</i></div>
+          <div class="istrip"><div><small>Sorteio</small><b id="bRNo">-</b></div><div><small>Cartela</small><b id="bPrice">20 fichas</b></div><div><small>Hora</small><b id="bTime">-</b></div></div>
+          <div class="prow"><span>1º PRÊMIO <em>🏆</em></span><small>Quadra</small><b id="bp1">0</b></div>
+          <div class="prow"><span>2º PRÊMIO <em>🏆</em></span><small>Quina</small><b id="bp2">0</b></div>
+          <div class="prow"><span>3º PRÊMIO <em>🏆</em></span><small>Bingo</small><b id="bp3">0</b></div>
+        </div>
+        <div id="drawView">
+          <div class="ptabs">
           <div class="pz" id="pz-quadra"><small>Prêmio 1 · Quadra</small><b>0</b><em></em></div>
           <div class="pz" id="pz-quina"><small>Prêmio 2 · Quina</small><b>0</b><em></em></div>
           <div class="pz" id="pz-bingo"><small>Prêmio 3 · Bingo</small><b>0</b><em></em></div>
         </div>
-        <div class="vgrid">
+          <div class="vgrid">
           <div class="infos">
             <div><small>Sorteio</small><b id="rNo">0</b></div>
             <div><small>Cartela</small><b><span id="price">20</span> fichas</b></div>
@@ -87,26 +95,27 @@
           </div>
           <div id="prev" class="prev"><i></i><i></i><i></i></div>
         </div>
-        <div class="statusbar">
+          <div class="statusbar">
           <div><div id="status" class="status">Carregando…</div><div id="best" class="best"></div></div>
           <div id="count" class="ordem">--</div>
         </div>
-        <div class="smallstats"><span>Prêmio total <b id="pool">0</b></span><span>Cartelas <b id="nCards">0</b></span></div>
-        <div id="board" class="board15"></div>
-        <div id="nearBox" class="tbl hide">
+          <div class="smallstats"><span>Prêmio total <b id="pool">0</b></span><span>Cartelas <b id="nCards">0</b></span></div>
+          <div id="board" class="board15"></div>
+          <div id="nearBox" class="tbl hide">
           <div class="tr th"><span>CUPOM</span><span>JOGADOR</span><span id="faltamH">FALTAM</span></div>
           <div id="nearList"></div>
         </div>
-        <div id="buyBox" class="buy">
-          <div class="buy-row">
-            <button class="qty" data-d="-1">−</button>
-            <input id="qty" type="number" value="5" min="1" max="50">
-            <button class="qty" data-d="1">+</button>
-            <div class="quick"><button data-q="1">1</button><button data-q="10">10</button><button data-q="20">20</button><button data-q="50">50</button></div>
-          </div>
-          <button id="buyBtn" class="btn big">Comprar cartelas</button>
         </div>
       </div>
+      <div id="buyBox" class="buybox2">
+        <div class="saldo">Saldo: <b id="bSaldo">0</b> fichas</div>
+        <div class="quick2"><button data-q="5">5</button><button data-q="10">10</button><button data-q="20">20</button><button data-q="30">30</button><button data-q="40">40</button><button data-q="50">50</button><button data-q="100">100</button><button data-q="200">200</button></div>
+        <div class="buyline">
+          <div class="stepper"><button class="qty" data-d="-1">−</button><input id="qty" type="number" value="1" min="1" max="200"><button class="qty" data-d="1">+</button></div>
+          <div class="pay"><span id="bTotal">20</span><button id="buyBtn">Comprar</button></div>
+        </div>
+      </div>
+      <div class="sumbar">SALDO <b id="sSaldo">0</b> | COMPRADAS <b id="sComp">0</b></div>
       <h3>Minhas cartelas <small id="myCount"></small></h3>
       <div id="cards" class="cards"></div>
     </div>
