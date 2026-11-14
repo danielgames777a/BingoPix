@@ -1,12 +1,23 @@
-# BingoPix (versão de teste)
+# BingoPix — protótipo em modo de teste
 
-Bingo online de 90 bolas com **fichas de brincadeira**. Não tem Pix, depósito, saque nem prêmio em dinheiro.
+Bingo online de 90 bolas com carteira e valores exibidos em reais. **Esta versão é estritamente simulada:** não se conecta à InfinitePay, não inicia cobranças e não realiza saques ou pagamentos. O saldo, os depósitos, as compras, os sorteios e os prêmios são fictícios. Não informe uma chave Pix real.
 
-- Login e cadastro, 1.000 fichas de boas-vindas
-- Rodadas automáticas, cartelas de 15 números (3x5)
-- Prêmios em fichas: Quadra, Quina e Cartela cheia (Bingo)
-- Sorteio ao vivo com socket.io, marcação automática, chat
+Cada cartela custa R$ 0,20. O depósito de teste aceita valores de R$ 5,00 a R$ 50,00. Após a primeira confirmação simulada, a conta recebe uma única vez R$ 40,00 de bônus, separado do saldo sacável e utilizável somente para comprar cartelas. O prêmio total é sorteado por rodada com limite de R$ 300,00 (normal) ou R$ 500,00 (especial), dividido entre Quadra (15%), Quina (25%) e Bingo (60%). Solicitações de saque e revisão administrativa também são somente simulações.
 
-Rodar: `npm install && npm start` (porta `PORT`, padrão 3000).
+## Executar localmente
 
-Variáveis opcionais: `JWT_SECRET`, `ROUND_GAP` (segundos entre rodadas, padrão 60), `DRAW_MS` (ms entre bolas, padrão 2500), `CARD_PRICE` (padrão 10), `BOTS` (cartelas de bots por rodada, padrão 12).
+Use Node.js 18 ou superior:
+
+```sh
+npm install
+npm test
+npm start
+```
+
+O servidor usa a porta indicada por `PORT` (padrão `3000`) e armazena dados locais de teste em `data/db.json`, que não é versionado. Rodadas ocorrem a cada cinco minutos por padrão (`ROUND_MIN`); `DRAW_MS` controla o intervalo entre bolas.
+
+Para habilitar o painel administrativo de teste, defina `ADMIN_USER` como o nome de usuário já cadastrado que deve acessar a revisão. Sem essa variável, o painel permanece bloqueado. Defina `JWT_SECRET` como segredo aleatório em qualquer implantação de teste persistente. Não coloque chaves da InfinitePay, chaves Pix ou outros segredos no repositório, no navegador ou em arquivos commitados.
+
+## Pagamentos
+
+A confirmação de depósito é um botão de simulação local. Esta versão não chama endpoints reais da InfinitePay; a documentação consultada não apresentou um ambiente de sandbox de pagamentos. Uma futura integração real precisará ser implementada e validada separadamente, com credencial nova configurada como secret no servidor e com os requisitos legais e do provedor verificados. A chave que foi compartilhada anteriormente no chat deve ser revogada e substituída antes de qualquer uso real.
